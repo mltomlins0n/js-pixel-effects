@@ -6,3 +6,4 @@
 
 * Making an image greyscale
 * Creating a particle system to animate an image
+* Using a particle system to make interactive text
