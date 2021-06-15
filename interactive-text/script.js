@@ -3,13 +3,12 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 let particleArray = [];
-const data = ctx.getImageData(0, 0, 100, 100);
 
-// handle mouse movement
+// Handle mouse movement
 const mouse = {
     x: null,
     y: null,
-    radius: 150
+    radius: 50
 }
 
 window.addEventListener('mousemove', function(event){
@@ -23,6 +22,7 @@ ctx.fillStyle = 'white';
 ctx.font = '30px Verdana';
 ctx.fillText('A', 0, 40);
 
+const textCoordinates = ctx.getImageData(0, 0, 100, 100);
 
 class Particle {
     constructor(x, y){
@@ -48,7 +48,7 @@ class Particle {
         let forceDirecctionY = dy / distance;
         let maxDistance = mouse.radius;
         // Calculate the speed a particle should move based on its distance from the cursor
-        // force is a number between 0 and 1, multiply a particle's speed by this to slow it
+        // Force is a number between 0 and 1, multiply a particle's speed by this to slow it
         let force = (maxDistance - distance) / maxDistance;
         let directionX = forceDirecctionX * force * this.density;
         let directionY = forceDirecctionY * force * this.density;
@@ -56,7 +56,7 @@ class Particle {
         if (distance < mouse.radius) {
             this.x -= directionX;
             this.y -= directionY;
-        } else { // return the particle to its base position
+        } else { // Return the particle to its base position
             if (this.x !== this.baseX) {
             let dx = this.x - this.baseX;
             this.x -= dx / 40;
@@ -71,11 +71,24 @@ class Particle {
 
 function init() {
     particleArray = [];
-    for (let i = 0; i < 800; i++) {
-        let x = Math.random() * canvas.width;
-        let y = Math.random() * canvas.height;
-        particleArray.push(new Particle(x, y));
+    // Loop through each row of pixel data, then each pixel in that row
+    for (let y = 0, y2 = textCoordinates.height; y < y2; y++) {
+        for (let x = 0, x2 = textCoordinates.width; x < x2; x++) {
+            // Check that a pixel's 'alpha' value is above 50% opacity (128)
+            // Checks the 4th element in each pixel's rgba properties
+            if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 10) {
+                let positionX = x;
+                let positionY = y;
+                particleArray.push(new Particle(positionX * 10, positionY * 10));
+            }
+        }
     }
+    // Random distribution of particles
+    //for (let i = 0; i < 800; i++) {
+    //    let x = Math.random() * canvas.width;
+    //    let y = Math.random() * canvas.height;
+    //    particleArray.push(new Particle(x, y));
+    //}
 }
 init();
 console.log(particleArray);
