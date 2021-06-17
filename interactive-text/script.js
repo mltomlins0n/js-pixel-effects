@@ -3,12 +3,14 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 let particleArray = [];
+let ajustX = 5;
+let ajustY = 0;
 
 // Handle mouse movement
 const mouse = {
     x: null,
     y: null,
-    radius: 50
+    radius: 150
 }
 
 window.addEventListener('mousemove', function(event){
@@ -19,8 +21,9 @@ window.addEventListener('mousemove', function(event){
 
 // Format the text
 ctx.fillStyle = 'white';
-ctx.font = '30px Verdana';
-ctx.fillText('A', 0, 40);
+ctx.font = '20px Verdana';
+ctx.fillText('H e l l o', 0, 25);
+ctx.fillText('W o r l d', 0, 45);
 
 const textCoordinates = ctx.getImageData(0, 0, 100, 100);
 
@@ -59,11 +62,11 @@ class Particle {
         } else { // Return the particle to its base position
             if (this.x !== this.baseX) {
             let dx = this.x - this.baseX;
-            this.x -= dx / 40;
+            this.x -= dx / 20;
             }
             if (this.y !== this.baseY) {
                 let dy = this.y - this.baseY;
-                this.y -= dy / 40;
+                this.y -= dy / 20;
             }
         }
     }
@@ -77,9 +80,9 @@ function init() {
             // Check that a pixel's 'alpha' value is above 50% opacity (128)
             // Checks the 4th element in each pixel's rgba properties
             if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 10) {
-                let positionX = x;
-                let positionY = y;
-                particleArray.push(new Particle(positionX * 10, positionY * 10));
+                let positionX = x + ajustX;
+                let positionY = y + ajustY;
+                particleArray.push(new Particle(positionX * 20, positionY * 20));
             }
         }
     }
@@ -99,6 +102,28 @@ function animate() {
         particleArray[i].draw();
         particleArray[i].update();
     }
+    connectParticles();
     requestAnimationFrame(animate);
 }
 animate();
+
+function connectParticles() {
+    let opacity = 1;
+    for (let a = 0; a < particleArray.length; a++) {
+        for (let b = a; b < particleArray.length; b++) {
+            let dx = particleArray[a].x - particleArray[b].x;
+            let dy = particleArray[a].y - particleArray[b].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 40) {
+                opacity = 1 - (distance / 40);
+                ctx.strokeStyle = 'rgba(66,233,245,' + opacity + ')';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(particleArray[a].x, particleArray[a].y);
+                ctx.lineTo(particleArray[b].x, particleArray[b].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
